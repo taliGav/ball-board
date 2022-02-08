@@ -1,0 +1,28 @@
+body {
+    background-color: black;
+    color: white;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+}
+.cell img {
+    width: 25px;
+    height: auto;
+}
+.floor {
+    background-color: gray;
+}
+.wall {
+    background-color: brown;
+}
+
+.game-over {
+    border-radius:15%;
+    background-color: black;
+    color: white;
+    font-size: 2em;
+    margin-top: 15px;
+}
