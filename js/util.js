@@ -23,5 +23,9 @@ function formatTime(seconds) {
     seconds %= 3600;
     const minutes = Math.floor(seconds / 60);
     seconds %= 60;
-    return `${hours}:${minutes}:${seconds}`;
+
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+
+    return `${hours}:${formattedMinutes}:${formattedSeconds}`;
 }
