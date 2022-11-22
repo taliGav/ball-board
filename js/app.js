@@ -12,28 +12,29 @@ const GLUE_IMG = '<img src="img/candy.png">';
 
 
 // Model:
-var gBoard;
-var gGamerPos;
-var gBallInterval;
-var gSecIntervalId;
-var gTotalBallsOnBoard;
-var gMoves;
-var gCollected;
-var gIsGlued;
-
+let gBoard;
+let gGamerPos;
+let gBallIntervalId;
+let gGlueIntervalId;
+let gTotalBallsOnBoard;
+let gMoveCount;
+let gCollected;
+let gIsGlued;
+let gIsGameActive;
 let gElPlayAgain = document.querySelector('.play-again');
 let gElGameOver = document.querySelector('.game-over');
 
 function initGame() {
+	gIsGameActive = true;
 	gIsGlued = false;
 	gTotalBallsOnBoard = 2;
-	gMoves = 0;
+	gMoveCount = 0;
 	gCollected = 0;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
 	addMoreBalls();
-	renderMovesMade();
+	renderMoveCount();
 	renderCollectedBalls();
 	addGlueToBoard();
 	// clearGlueInt();
@@ -68,14 +69,14 @@ function buildBoard() {
 // Render the board to an HTML table
 function renderBoard(board) {
 
-	var elBoard = document.querySelector('.board');
-	var strHTML = '';
-	for (var i = 0; i < board.length; i++) {
+	const elBoard = document.querySelector('.board');
+	let strHTML = '';
+	for (let i = 0; i < board.length; i++) {
 		strHTML += '<tr>\n';
-		for (var j = 0; j < board[0].length; j++) {
-			var currCell = board[i][j];
+		for (let j = 0; j < board[0].length; j++) {
+			const currCell = board[i][j];
 
-			var cellClass = getClassName({ i: i, j: j }); // cell-i-j
+			let cellClass = getCellClassName({ i: i, j: j }); // cell-i-j
 
 			if (currCell.type === FLOOR) cellClass += ' floor';
 			else if (currCell.type === WALL) cellClass += ' wall';
@@ -100,16 +101,17 @@ function renderBoard(board) {
 
 // Move the player to a specific location
 function moveTo(i, j) {
+	if (!gIsGameActive) return;
 	if (gIsGlued) return;
 
-	var targetCell = gBoard[i][j];
+	const targetCell = gBoard[i][j];
 
 	// { type:WALL, gameElement:null }
 	if (targetCell.type === WALL) return;
 
 	// Calculate distance to make sure we are moving to a neighbor cell
-	var iAbsDiff = Math.abs(i - gGamerPos.i); // 1-2 = -1 === 1
-	var jAbsDiff = Math.abs(j - gGamerPos.j);
+	const iAbsDiff = Math.abs(i - gGamerPos.i); // 1-2 = -1 === 1
+	const jAbsDiff = Math.abs(j - gGamerPos.j);
 
 	// If the clicked Cell is one of the four allowed
 	if ((iAbsDiff === 1 && jAbsDiff === 0) || (jAbsDiff === 1 && iAbsDiff === 0)
@@ -141,14 +143,14 @@ function moveTo(i, j) {
 
 		// update game pos and moves
 		gGamerPos = { i: i, j: j };
-		gMoves++;
+		gMoveCount++;
 
 		// MODEL
 		gBoard[gGamerPos.i][gGamerPos.j].gameElement = GAMER;
 
 		// DOM
 		renderCell(gGamerPos, GAMER_IMG);
-		renderMovesMade()
+		renderMoveCount()
 
 	} else console.log('TOO FAR', iAbsDiff, jAbsDiff);
 
@@ -158,16 +160,16 @@ function moveTo(i, j) {
 
 // .cell-0-0
 function renderCell(location, value) {
-	var cellSelector = '.' + getClassName(location);
-	var elCell = document.querySelector(cellSelector);
+	const cellSelector = '.' + getCellClassName(location);
+	const elCell = document.querySelector(cellSelector);
 	elCell.innerHTML = value;
 }
 
 // Move the player by keyboard arrows
 function handleKey(event) {
 
-	var i = gGamerPos.i;
-	var j = gGamerPos.j;
+	const i = gGamerPos.i;
+	const j = gGamerPos.j;
 
 	switch (event.key) {
 		case 'ArrowLeft':
@@ -186,8 +188,8 @@ function handleKey(event) {
 }
 
 // Returns the class name for a specific cell
-function getClassName(location) {
-	var cellClass = 'cell-' + location.i + '-' + location.j;
+function getCellClassName(location) {
+	const cellClass = 'cell-' + location.i + '-' + location.j;
 	return cellClass;
 }
 
@@ -200,22 +202,22 @@ function getClassName(location) {
 
 
 function addGlueToBoard() {
-	gSecIntervalId = setInterval(addGlueToRandCell, 5000);
+	gGlueIntervalId = setInterval(addGlueToRandCell, 5000);
 }
 
 function clearGlueInt() {
-	clearInterval(gSecIntervalId);
-	gSecIntervalId = null
+	clearInterval(gGlueIntervalId);
+	gGlueIntervalId = null
 }
 
 function addGlueToRandCell() {
 
-	var emptyCells = getEmptyCells()
+	const emptyCells = getEmptyCells()
 	if (!emptyCells.length) return
 
-	var randIdx = getRandomInt(0, emptyCells.length - 1)
-	var cellLoc = emptyCells[randIdx];
-	var cell = gBoard[cellLoc.i][cellLoc.j]
+	const randIdx = getRandomInt(0, emptyCells.length - 1)
+	const cellLoc = emptyCells[randIdx];
+	const cell = gBoard[cellLoc.i][cellLoc.j]
 	cell.gameElement = GLUE;
 
 	renderCell({ i: cellLoc.i, j: cellLoc.j }, GLUE_IMG);
@@ -232,23 +234,32 @@ function addGlueToRandCell() {
 
 // Player won the game when all balls are collected + play again button
 function playerWon() {
+	gIsGameActive = false;
 	stopAddingBalls();
 	clearGlueInt();
 
 	gElPlayAgain.hidden = false;
 }
 
+function gameOver() {
+	gIsGameActive = false;
+	stopAddingBalls();
+	clearGlueInt();
+
+	gElGameOver.hidden = false;
+}
+
 
 // Show how many balls were collected
 function renderCollectedBalls() {
-	var elBalls = document.querySelector('.balls span');
+	const elBalls = document.querySelector('.balls span');
 	elBalls.innerText = gCollected;
 }
 
 // Show how many moves were made
-function renderMovesMade() {
-	var elMoves = document.querySelector('.moves span');
-	elMoves.innerText = gMoves;
+function renderMoveCount() {
+	const elMoves = document.querySelector('.moves span');
+	elMoves.innerText = gMoveCount;
 }
 
 
@@ -261,26 +272,27 @@ function playCollectSound() {
 
 // Every few seconds a new ball is added in a random empty cell
 function addMoreBalls() {
-	gBallInterval = setInterval(newBall, 1200);
+	gBallIntervalId = setInterval(newBall, 1200);
 }
 
 function stopAddingBalls() {
-	clearInterval(gBallInterval);
-	gBallInterval = null;
+	clearInterval(gBallIntervalId);
+	gBallIntervalId = null;
 }
 
 function newBall() {
 	const emptyCells = getEmptyCells()
 	// console.log('emptyCells', emptyCells);
-	if (!emptyCells.length) return
+	if (!emptyCells.length) gameOver() // if no empty cells left, game over
+	else {
+		const randIdx = getRandomInt(0, emptyCells.length - 1)
+		const cellLoc = emptyCells[randIdx];
+		const cell = gBoard[cellLoc.i][cellLoc.j]
+		cell.gameElement = BALL;
+		gTotalBallsOnBoard++;
 
-	const randIdx = getRandomInt(0, emptyCells.length - 1)
-	const cellLoc = emptyCells[randIdx];
-	const cell = gBoard[cellLoc.i][cellLoc.j]
-	cell.gameElement = BALL;
-	gTotalBallsOnBoard++;
-
-	renderCell({ i: cellLoc.i, j: cellLoc.j }, BALL_IMG);
+		renderCell({ i: cellLoc.i, j: cellLoc.j }, BALL_IMG);
+	}
 }
 
 function getEmptyCells() {
