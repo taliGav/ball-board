@@ -11,11 +11,11 @@ body {
 } */
 .main-game-view {
     display: flex;
+    justify-content: space-evenly;
 }
 
 table {
     border: 1px solid #344D67;
-    margin: 0 auto;
     min-width: 500px;
 }
 
@@ -41,20 +41,17 @@ article {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding-left: 20px;
-    /* align-items: center; */
-    /* text-align: center; */
+    padding: 20px;
 }
 
 article>* {
-    padding: 30px 60px 30px 20px;
+    padding: 20px;
     font-size: large;
 }
 
 button {
     background-color: #363062;
     padding: 10px 20px;
-    margin-top: 25px;
     border-radius: 40px;
     border: none;
     font-family: 'Russo One', sans-serif;
