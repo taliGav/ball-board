@@ -16,11 +16,14 @@ let gBoard;
 let gGamerPos;
 let gBallIntervalId;
 let gGlueIntervalId;
+let gTimerIntervalId;
 let gTotalBallsOnBoard;
 let gMoveCount;
 let gCollected;
 let gIsGlued;
 let gIsGameActive;
+let gTime;
+
 let gElPlayAgain = document.querySelector('.play-again');
 let gElGameOver = document.querySelector('.game-over');
 
@@ -32,6 +35,7 @@ function initGame() {
 	gCollected = 0;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
+	timeCount(gTime = 0);
 	renderBoard(gBoard);
 	addMoreBalls();
 	renderMoveCount();
@@ -70,7 +74,9 @@ function buildBoard() {
 function renderBoard(board) {
 
 	const elBoard = document.querySelector('.board');
+
 	let strHTML = '';
+
 	for (let i = 0; i < board.length; i++) {
 		strHTML += '<tr>\n';
 		for (let j = 0; j < board[0].length; j++) {
@@ -82,7 +88,6 @@ function renderBoard(board) {
 			else if (currCell.type === WALL) cellClass += ' wall';
 
 			strHTML += `\t<td class="cell ${cellClass}" onclick="moveTo(${i},${j})" >\n`;
-
 
 			if (currCell.gameElement === GAMER) {
 				strHTML += GAMER_IMG;
@@ -139,7 +144,7 @@ function moveTo(i, j) {
 		gBoard[gGamerPos.i][gGamerPos.j].gameElement = null;
 
 		// DOM
-		renderCell(gGamerPos, '');
+		// renderCell(gGamerPos, '');
 
 		// update game pos and moves
 		gGamerPos = { i: i, j: j };
@@ -156,14 +161,6 @@ function moveTo(i, j) {
 
 }
 
-// Convert a location object {i, j} to a selector and render a value in that element
-
-// .cell-0-0
-function renderCell(location, value) {
-	const cellSelector = '.' + getCellClassName(location);
-	const elCell = document.querySelector(cellSelector);
-	elCell.innerHTML = value;
-}
 
 // Move the player by keyboard arrows
 function handleKey(event) {
@@ -185,6 +182,23 @@ function handleKey(event) {
 			(i === 9 && j === 5) ? moveTo(0, 5) : moveTo(i + 1, j);
 			break;
 	}
+}
+
+// Show how many moves were made
+function renderMoveCount() {
+	const elMoves = document.querySelector('.moves span');
+	elMoves.innerText = gMoveCount;
+}
+
+
+
+// Convert a location object {i, j} to a selector and render a value in that element
+
+// .cell-0-0
+function renderCell(location, value) {
+	const cellSelector = '.' + getCellClassName(location);
+	const elCell = document.querySelector(cellSelector);
+	elCell.innerHTML = value;
 }
 
 // Returns the class name for a specific cell
@@ -250,29 +264,21 @@ function gameOver() {
 }
 
 
-// Show how many balls were collected
-function renderCollectedBalls() {
-	const elBalls = document.querySelector('.balls span');
-	elBalls.innerText = gCollected;
-}
-
-// Show how many moves were made
-function renderMoveCount() {
-	const elMoves = document.querySelector('.moves span');
-	elMoves.innerText = gMoveCount;
-}
-
-
 //play a sound when gamer collects a ball
 function playCollectSound() {
 	const collect = new Audio('sounds/collect.wav');
 	collect.play();
 }
 
+// Show how many balls were collected
+function renderCollectedBalls() {
+	const elBalls = document.querySelector('.balls span');
+	elBalls.innerText = gCollected;
+}
 
 // Every few seconds a new ball is added in a random empty cell
 function addMoreBalls() {
-	gBallIntervalId = setInterval(newBall, 1200);
+	gBallIntervalId = setInterval(newBall, 50);
 }
 
 function stopAddingBalls() {
@@ -290,6 +296,7 @@ function newBall() {
 		const cell = gBoard[cellLoc.i][cellLoc.j]
 		cell.gameElement = BALL;
 		gTotalBallsOnBoard++;
+		console.log("cell:", cell, "cellLoc:", cellLoc);
 
 		renderCell({ i: cellLoc.i, j: cellLoc.j }, BALL_IMG);
 	}
@@ -305,4 +312,21 @@ function getEmptyCells() {
 		}
 	}
 	return res;
+}
+
+
+function timeCount() {
+	if (gIsGameActive) {
+		gTimerIntervalId = setInterval(() => {
+			gTime++;
+			renderTime();
+		}, 1000);
+	} else {
+		clearInterval(gTimerIntervalId);
+	}
+}
+
+function renderTime() {
+	const elTime = document.querySelector('.timer span');
+	elTime.innerText = formatTime(gTime);
 }
