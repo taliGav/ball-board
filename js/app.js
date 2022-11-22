@@ -17,22 +17,27 @@ var gGamerPos;
 var gBallInterval;
 var gSecIntervalId;
 var gTotalBallsOnBoard;
+var gMoves;
 var gCollected;
 var gIsGlued;
 
-var gElGameOver = document.querySelector('.game-over');
+let gElPlayAgain = document.querySelector('.play-again');
+let gElGameOver = document.querySelector('.game-over');
 
 function initGame() {
 	gIsGlued = false;
 	gTotalBallsOnBoard = 2;
+	gMoves = 0;
 	gCollected = 0;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
 	addMoreBalls();
-	collectedBalls();
+	renderMovesMade();
+	renderCollectedBalls();
 	addGlueToBoard();
 	// clearGlueInt();
+	gElPlayAgain.hidden = true;
 	gElGameOver.hidden = true;
 }
 
@@ -88,8 +93,8 @@ function renderBoard(board) {
 		}
 		strHTML += '</tr>\n';
 	}
-	// console.log('strHTML is:');
-	// console.log(strHTML);
+	console.log('strHTML is:');
+	console.log(strHTML);
 	elBoard.innerHTML = strHTML;
 }
 
@@ -113,10 +118,10 @@ function moveTo(i, j) {
 		if (targetCell.gameElement === BALL) {
 			console.log('Collecting!');
 			gCollected++;
-			collectSound();
-			collectedBalls();
+			playCollectSound();
+			renderCollectedBalls();
 
-			if (gTotalBallsOnBoard === gCollected) gameOver();
+			if (gTotalBallsOnBoard === gCollected) playerWon();
 		}
 
 		if (targetCell.gameElement === GLUE) {
@@ -134,14 +139,16 @@ function moveTo(i, j) {
 		// DOM
 		renderCell(gGamerPos, '');
 
-		// update game pos
+		// update game pos and moves
 		gGamerPos = { i: i, j: j };
+		gMoves++;
 
 		// MODEL
 		gBoard[gGamerPos.i][gGamerPos.j].gameElement = GAMER;
 
 		// DOM
 		renderCell(gGamerPos, GAMER_IMG);
+		renderMovesMade()
 
 	} else console.log('TOO FAR', iAbsDiff, jAbsDiff);
 
@@ -223,25 +230,31 @@ function addGlueToRandCell() {
 
 
 
-// Game over when all are balls collected + restart button
-function gameOver() {
+// Player won the game when all balls are collected + play again button
+function playerWon() {
 	stopAddingBalls();
 	clearGlueInt();
 
-	gElGameOver.hidden = false;
+	gElPlayAgain.hidden = false;
 }
 
 
 // Show how many balls were collected
-function collectedBalls() {
+function renderCollectedBalls() {
 	var elBalls = document.querySelector('.balls span');
 	elBalls.innerText = gCollected;
 }
 
+// Show how many moves were made
+function renderMovesMade() {
+	var elMoves = document.querySelector('.moves span');
+	elMoves.innerText = gMoves;
+}
+
 
 //play a sound when gamer collects a ball
-function collectSound() {
-	var collect = new Audio('sounds/collect.wav');
+function playCollectSound() {
+	const collect = new Audio('sounds/collect.wav');
 	collect.play();
 }
 
@@ -257,12 +270,13 @@ function stopAddingBalls() {
 }
 
 function newBall() {
-	var emptyCells = getEmptyCells()
+	const emptyCells = getEmptyCells()
+	// console.log('emptyCells', emptyCells);
 	if (!emptyCells.length) return
 
-	var randIdx = getRandomInt(0, emptyCells.length - 1)
-	var cellLoc = emptyCells[randIdx];
-	var cell = gBoard[cellLoc.i][cellLoc.j]
+	const randIdx = getRandomInt(0, emptyCells.length - 1)
+	const cellLoc = emptyCells[randIdx];
+	const cell = gBoard[cellLoc.i][cellLoc.j]
 	cell.gameElement = BALL;
 	gTotalBallsOnBoard++;
 
@@ -270,11 +284,11 @@ function newBall() {
 }
 
 function getEmptyCells() {
-	var res = [];
-	for (var i = 0; i < gBoard.length; i++) {
-		for (var j = 0; j < gBoard[0].length; j++) {
-			var loc = { i: i, j: j }
-			var currCell = gBoard[i][j];
+	const res = [];
+	for (let i = 0; i < gBoard.length; i++) {
+		for (let j = 0; j < gBoard[0].length; j++) {
+			const loc = { i: i, j: j }
+			const currCell = gBoard[i][j];
 			if (currCell.type === FLOOR && !currCell.gameElement) res.push(loc);
 		}
 	}
