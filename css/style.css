@@ -16,6 +16,7 @@ body {
 table {
     border: 1px solid #344D67;
     margin: 0 auto;
+    min-width: 500px;
 }
 
 .cell {
