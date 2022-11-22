@@ -27,6 +27,16 @@ let gTime;
 let gElPlayAgain = document.querySelector('.play-again');
 let gElGameOver = document.querySelector('.game-over');
 
+
+
+
+
+const gameData ={
+
+}
+
+
+
 function initGame() {
 	gIsGameActive = true;
 	gIsGlued = false;
@@ -35,7 +45,7 @@ function initGame() {
 	gCollected = 0;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
-	timeCount(gTime = 0);
+	startTimeCount(gTime = 0);
 	renderBoard(gBoard);
 	addMoreBalls();
 	renderMoveCount();
@@ -99,6 +109,7 @@ function renderBoard(board) {
 		}
 		strHTML += '</tr>\n';
 	}
+	console.log("board", board);
 	console.log('strHTML is:');
 	console.log(strHTML);
 	elBoard.innerHTML = strHTML;
@@ -144,7 +155,7 @@ function moveTo(i, j) {
 		gBoard[gGamerPos.i][gGamerPos.j].gameElement = null;
 
 		// DOM
-		// renderCell(gGamerPos, '');
+		renderCell(gGamerPos, '');
 
 		// update game pos and moves
 		gGamerPos = { i: i, j: j };
@@ -226,29 +237,26 @@ function clearGlueInt() {
 
 function addGlueToRandCell() {
 
-	const emptyCells = getEmptyCells()
-	if (!emptyCells.length) return
+	const currLocation = getEmptyCellLocation()
 
-	const randIdx = getRandomInt(0, emptyCells.length - 1)
-	const cellLoc = emptyCells[randIdx];
-	const cell = gBoard[cellLoc.i][cellLoc.j]
+	const cell = gBoard[currLocation.i][currLocation.j]
 	cell.gameElement = GLUE;
 
-	renderCell({ i: cellLoc.i, j: cellLoc.j }, GLUE_IMG);
+	renderCell({ i: currLocation.i, j: currLocation.j }, GLUE_IMG);
 
 	setTimeout(() => {
 		if (cell.gameElement === GLUE) {
 			cell.gameElement = null;
-			renderCell({ i: cellLoc.i, j: cellLoc.j }, '');
+			renderCell({ i: currLocation.i, j: currLocation.j }, '');
 		}
-	}, 3000);
+	}, 2500);
 }
-
 
 
 // Player won the game when all balls are collected + play again button
 function playerWon() {
 	gIsGameActive = false;
+	endTimeCount();
 	stopAddingBalls();
 	clearGlueInt();
 
@@ -257,6 +265,7 @@ function playerWon() {
 
 function gameOver() {
 	gIsGameActive = false;
+	endTimeCount();
 	stopAddingBalls();
 	clearGlueInt();
 
@@ -278,7 +287,7 @@ function renderCollectedBalls() {
 
 // Every few seconds a new ball is added in a random empty cell
 function addMoreBalls() {
-	gBallIntervalId = setInterval(newBall, 50);
+	gBallIntervalId = setInterval(newBall, 400);
 }
 
 function stopAddingBalls() {
@@ -287,20 +296,29 @@ function stopAddingBalls() {
 }
 
 function newBall() {
+	const currLocation = getEmptyCellLocation()
+
+	const cell = gBoard[currLocation.i][currLocation.j]
+	cell.gameElement = BALL;
+	gTotalBallsOnBoard++;
+
+	console.log("cell:", cell, "cellLoc:", currLocation);
+
+	renderCell({ i: currLocation.i, j: currLocation.j }, BALL_IMG);
+}
+
+
+function getEmptyCellLocation() {
 	const emptyCells = getEmptyCells()
-	// console.log('emptyCells', emptyCells);
-	if (!emptyCells.length) gameOver() // if no empty cells left, game over
-	else {
+	if (!emptyCells.length) { return gameOver() } else {
+
 		const randIdx = getRandomInt(0, emptyCells.length - 1)
 		const cellLoc = emptyCells[randIdx];
-		const cell = gBoard[cellLoc.i][cellLoc.j]
-		cell.gameElement = BALL;
-		gTotalBallsOnBoard++;
-		console.log("cell:", cell, "cellLoc:", cellLoc);
-
-		renderCell({ i: cellLoc.i, j: cellLoc.j }, BALL_IMG);
+		// const cell = gBoard[cellLoc.i][cellLoc.j]
+		return cellLoc
 	}
 }
+
 
 function getEmptyCells() {
 	const res = [];
@@ -315,15 +333,17 @@ function getEmptyCells() {
 }
 
 
-function timeCount() {
+function startTimeCount() {
 	if (gIsGameActive) {
 		gTimerIntervalId = setInterval(() => {
 			gTime++;
 			renderTime();
 		}, 1000);
-	} else {
-		clearInterval(gTimerIntervalId);
 	}
+}
+
+function endTimeCount() {
+	clearInterval(gTimerIntervalId);
 }
 
 function renderTime() {
