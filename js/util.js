@@ -1,7 +1,7 @@
 function createMat(ROWS, COLS) {
-    var mat = []
-    for (var i = 0; i < ROWS; i++) {
-        var row = []
+    const mat = []
+    for (let i = 0; i < ROWS; i++) {
+        const row = []
         for (var j = 0; j < COLS; j++) {
             row.push('')
         }
