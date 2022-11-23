@@ -152,7 +152,7 @@ function moveTo(i:number, j:number) {
 		|| (gGamerPos.i === 5 && gGamerPos.j === 0) || (gGamerPos.i === 5 && gGamerPos.j === 11)
 		|| (gGamerPos.i === 0 && gGamerPos.j === 5) || (gGamerPos.i === 9 && gGamerPos.j === 5)) {
 		if (targetCell.gameElement === BALL) {
-			console.log('Collecting!');
+			// console.log('Collecting!');
 			gCollected++;
 			playCollectSound();
 			renderCollectedBalls();
