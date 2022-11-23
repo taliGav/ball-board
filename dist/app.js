@@ -23,13 +23,13 @@ let gElGameOver = document.querySelector('.game-over');
 const gameData = {};
 function initGame() {
     gIsGameActive = true;
+    startTimeCount(gTime = 0);
     gIsGlued = false;
     gTotalBallsOnBoard = 2;
     gMoveCount = 0;
     gCollected = 0;
     gGamerPos = { i: 2, j: 9 };
     gBoard = buildBoard();
-    startTimeCount(gTime = 0);
     renderBoard(gBoard);
     addMoreBalls();
     renderMoveCount();
@@ -258,6 +258,7 @@ function getEmptyCellLocations() {
 }
 function startTimeCount(gTime) {
     if (gIsGameActive) {
+        renderTime(gTime);
         gTimerIntervalId = setInterval(() => {
             gTime++;
             renderTime(gTime);
