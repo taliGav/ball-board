@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Balls</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body onkeyup="handleKey(event)" onload="initGame()">
+  <header>
+    <h1>Collect those Balls</h1>
+  </header>
+
+  <section class="main-game-view">
+
+    <table>
+      <tbody class="board"></tbody>
+    </table>
+    
+    <article class="stats-info">
+      <div class='balls'>
+        You've collected <span></span> balls!
+      </div>
+      <div class='moves'>
+        You've made <span></span> moves!
+      </div>
+      <div class='timer'>
+        <p>Time Played:</p> 
+        <span></span> 
+      </div>
+    </article>
+  </section>
+
+  <section class="actions">
+    <div class="play-again">
+      <h1>You won this game ! 😉</h1>
+      <button class="play-again-btn" onclick="initGame()">Play again!</button>
+    </div>
+    <div class="game-over">
+      <h1>Nice try 😪</h1>
+      <button class="game-over-btn" onclick="initGame()">Game Over</button>
+    </div>
+  </section>
+
+  <script src="./../dist/util.js"></script>
+  <script src="./../dist/app.js"></script>
+</body>
+
+</html>
